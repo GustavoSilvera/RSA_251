@@ -61,8 +61,7 @@ class num {
   num operator * (const num &n) const {//O(n^2)
     std::string other = n.get_value();
     int len2 = other.size(); 
-    if (len == 0 || len2 == 0) 
-      return num("0"); 
+    if (len == 0 || len2 == 0) return num("0"); 
     std::vector<int> result(len + len2, 0); 
     int i_n1 = 0;  
     int i_n2 = 0;  
@@ -110,31 +109,83 @@ class num {
 	str.push_back('9'); 
 	continue; 
       } 
-      int sub = ((str1[i]-'0') - carry); 
-      if (i>0 || sub>0) // remove preceding 0's 
-	str.push_back(sub+'0'); 
+      int sub = ((str1[i] - '0') - carry); 
+      if (i > 0 || sub>0) // remove preceding 0's 
+	str.push_back(sub + '0'); 
       carry = 0;   
     }  
     return clean(rev(str)); 
   }
+  num sdiv (const num &n) const {
+    int divisor = n.get_int();
+    std::string number = value;
+    std::string ans; 
+    size_t idx = 0; 
+    int temp = value[idx] - '0'; 
+    while (temp < divisor) temp = temp * 10 + (number[++idx] - '0'); 
+    while (number.size() > idx) { 
+      ans += (temp / divisor) + '0'; 
+      temp = (temp % divisor) * 10 + number[++idx] - '0'; 
+    } 
+    if (ans.length() == 0) return num("0"); 
+    return num(ans); 
+  }
   num operator / (const num &n) const {
-    num other = n;
-    int count = 0;
-    while(*this >= other){
+    //if(n < num(2147483647)) return (*this).sdiv(n);
+    //num other = n;
+    //int count = 0;
+    return binSearchDiv(*this, n);
+      /*while(*this >= other){
       count++;
       other = other + n;
     }
-    return count;
+    return count;*/
+  }
+  num smod (const num &n) const {
+    //for modding a big num with a small num
+    int m = n.get_int();//should be small enough
+    num res = num(0); 
+    for (size_t i = 0; i < len; i++) 
+      res = num((res.get_int() * 10 + (int(value[i]) - '0')) % m); 
+    return res; 
   }
   num operator % (const num &n) const {
+    //if(n < num(2147483647)) return (*this).smod(n);
+    //if(len < n.get_len()) return *this;//much smaller
     //wont work nicely with negatives
-    num here = *this;
+    //for big bois
+    num quotient = *this / n;
+    num remainder = *this - quotient * n;
+    return remainder;
+    //for small bois
+    /*num here = *this;
     if(*this < n) return *this;
     while(here >= n){
       here = here - n;
     }
-    return here;
+    return here;*/
   }
+  //long bois
+
+  num binSearchDiv(const num &dividend, const num &divisor) const {
+    num l = num(0);
+    num r = dividend;
+    while (l <= r) { 
+      num m = (r + l).sdiv(num(2)); //2 is a small number
+      num possible = m * divisor;
+      num possible_next = possible + divisor;
+      if (possible <= dividend && possible_next > dividend)//best one 
+	return m; 
+      if (possible < dividend) 
+	l = m + num(1);
+      else
+	r = m - num(1);
+    }
+    //error!
+    throw std::invalid_argument("failed division!");
+    return num(-1);
+}
+  
   //comparison operators
   bool operator == (const num &n) const{
     if(len != n.get_len()) return false;
@@ -153,8 +204,11 @@ class num {
   bool operator >= (const num &n) const{
     return (*this > n) || (*this == n);
   }
+  bool operator <= (const num &n) const{
+    return (*this < n) || (*this == n);
+  }
   bool is_odd(){
-    return (value[len - 1] % 2 == 1);
+    return (int(value[len - 1]) % 2 == 1);
   }
   //mutation operators
   void operator = (const num &n){

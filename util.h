@@ -2,6 +2,7 @@
 #define UTIL_H
 #include <math.h>
 #include <stdexcept>
+#include <vector>
 #include "number.h"
 //designed to work with num class
 num totient(num P, num Q){
@@ -23,10 +24,10 @@ num exp_mod(num base, num e, num mod){
   //via repeated squaring
   num ret = num(1);
   while (e > num(0)){
-    if (e.is_odd()){//can be easily optimized
+    if (e.is_odd()){
       ret = (ret * base) % mod;
     }
-    e = e / 2;
+    e = e / num(2);
     base = (base * base) % mod;
   }
   return ret;
@@ -43,24 +44,26 @@ inline num mod_inverse_fast(num a, num m) {
     return exp_mod(a, m - num(2), m); 
   }
   throw std::invalid_argument("ERROR: no multiplicative inverse!");
-} 
+}
+//O(log n) mult inv
 num gcdExtended(num a, num b, num *x, num *y) { 
   if (a == num(0)) { //base case
     *x = num(0), *y = num(1); 
     return b; 
   } 
-  num x1, y1; // To store results of recursive call 
-  num gcd = gcdExtended(b%a, a, &x1, &y1); 
+  num x1, y1; // To store results of recursive call
+  num gcd = gcdExtended(b % a, a, &x1, &y1);
   *x = y1 - (b / a) * x1; 
-  *y = x1; 
+  *y = x1;
   return gcd; 
 } 
-
+//computes multiplicative inverse 
 num mod_inverse_in(num a, num m) { 
-    num x, y; 
+    num x, y;
+    //extended euclidean algorithm!
     num g = gcdExtended(a, m, &x, &y); 
     if (g == num(1))
-      return m - ((x%m + m) % m);
+      return m - ((x % m + m) % m);
     throw std::invalid_argument("ERROR: no multiplicative inverse!");
 } 
 
