@@ -25,16 +25,18 @@ public:
   }
   void decode(num ciphertext){
     Message = E.decode(exp_mod(ciphertext, priv_key, N));
+    //std::cout << "C = " << ciphertext.print() << " E = " << 
+    //Message = E.decode(exp_mod(num(75), num(7), num(77)));
   }
   //for printing/debugging only
   std::string print_P(){
     return P.print();
   }
   std::string print_Q(){
-    return P.print();
+    return Q.print();
   }
   std::string print_key(){
-    return P.print();
+    return priv_key.print();
   }
   std::string print_M(){
     return Message;
@@ -70,11 +72,7 @@ private:
 int main(){
   std::srand(std::time(nullptr));
   Receiver Bob;
-  Sender Alice;
-  //num X = num(166);
-  //num Y = num(155);
-  //std::cout << (X / Y).print() << std::endl;
-  
+  Sender Alice;  
   Bob.setup();
   std::cout << "In Bob's locked safe: (P = " << Bob.print_P() << ", Q = " << Bob.print_Q() << ")" << std::endl;
   std::cout << "Bob's Private Key: " << Bob.print_key() << std::endl;

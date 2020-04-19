@@ -21,11 +21,11 @@ class num {
   num(const std::string &s){
     if(s[0] == '-'){
       sign = -1;
-      value = s.substr(1);//not including '-'
+      value = clean(s.substr(1));//not including '-'
     }
     else{
       sign = 1;
-      value = s;
+      value = clean(s);
     }
     len = value.size();
   };
@@ -55,11 +55,11 @@ class num {
         carry = sum/10; 
     } 
     if (carry != 0) str.push_back(carry+'0'); 
-    return rev(str); 
+    return clean(rev(str)); 
   }
   
   num operator * (const num &n) const {//O(n^2)
-    std::string num1 = value;
+    /*std::string num1 = value;
     std::string num2 = n.get_value();
     int len1 = num1.size(); 
     int len2 = num2.size(); 
@@ -130,8 +130,8 @@ class num {
     while (i >= 0) 
         s += std::to_string(result[i--]); 
   
-    return s;
-    /*
+    return s;*/
+    
     std::string other = n.get_value();
     int len2 = other.size(); 
     if (len == 0 || len2 == 0) 
@@ -159,12 +159,12 @@ class num {
       return num("0"); 
     std::string ret = ""; 
     while (i >= 0) ret += std::to_string(result[i--]); 
-    return ret;*/
+    return clean(ret);
   }
   num operator - (const num &n) const {
     std::string str1 = value;
     std::string str2 = n.get_value();
-    if (str1 < str2) swap(str1, str2); 
+    if (str1.size() < str2.size()) swap(str1, str2); 
     std::string str = ""; 
     int n1 = str1.length(), n2 = str2.length(); 
     int diff = n1 - n2; 
@@ -188,12 +188,12 @@ class num {
 	str.push_back(sub+'0'); 
       carry = 0;   
     }  
-    return rev(str); 
+    return clean(rev(str)); 
   }
   num operator / (const num &n) const {
     num other = n;
     int count = 0;
-    while(*this > other){
+    while(*this >= other){
       count++;
       other = other + n;
     }
@@ -210,34 +210,47 @@ class num {
   }
   //comparison operators
   bool operator == (const num &n) const{
-    return (remove_zeros(value).compare(remove_zeros(n.get_value())) == 0);
+    if(len != n.get_len()) return false;
+    return (value.compare(n.get_value()) == 0);
   }
   bool operator < (const num &n) const{
+    if(len < n.get_len()) return true;
+    else if (len > n.get_len()) return false;
     return (value.compare(n.get_value()) < 0);
   }
   bool operator > (const num &n) const{
+    if(len > n.get_len()) return true;
+    else if (len < n.get_len()) return false;
     return (value.compare(n.get_value()) > 0);
   }
   bool operator >= (const num &n) const{
-    return (value.compare(n.get_value()) >= 0);
+    return (*this > n) || (*this == n);
+  }
+  bool is_odd(){
+    return (value[len - 1] % 2 == 1);
   }
   //mutation operators
   void operator = (const num &n){
-    value = n.get_value();
+    value = clean(n.get_value());
+    len = value.size();
+    sign = n.get_sign();
   }
   //getters
   std::string get_value() const{
-    return value;
+    return clean(value);
   }
   int get_int() const {
     //used for debugging, use sparingly
     return std::stoi(value);
   }
   std::string print() const {
-    return value;
+    return clean(value);
   }
   int get_sign() const {
     return sign;
+  }
+  size_t get_len() const{
+    return len;
   }
  private:
   //private data
@@ -254,10 +267,10 @@ class num {
     }
     return ret;
   }
-  inline std::string remove_zeros(const std::string &r) const{
+  inline std::string clean(const std::string &r) const{
     const int strlen = r.size();
     int i = 0; 
-    while(r[i] == '0' && i < strlen){
+    while(r[i] == '0' && i < strlen - 1){
       i++;
     }
     return r.substr(i);
