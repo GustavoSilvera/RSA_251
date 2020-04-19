@@ -4,6 +4,7 @@
 
 class Person {
 public:
+  void setup();
 private:
   int priv_key;
 };

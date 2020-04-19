@@ -1,41 +1,43 @@
 #ifndef UTIL_H
 #define UTIL_H
-
 #include <math.h>
 #include <stdexcept>
-
-int totient(int P, int Q){
+#include "number.h"
+//designed to work with num class
+num totient(num P, num Q){
   //check for coprimality of P and Q
-  return (P - 1) * (Q - 1);
+  return (P - num(1)) * (Q - num(1));
 }
 
-inline int mod_inverse(int a, int m) { 
+inline num mod_inverse(num a, num m) { 
   a = a % m;//normalize in mod m
-  for (int x = 1; x < m; x++){ //try every one, guaranteed to terminate
-    if ((a*x) % m == 1){
+  for (num x = num(1); x < m.get_value(); x = x + num(1)){
+    //try every one, guaranteed to terminate
+    if ( (a * x) % m == num(1)){
       return x;
     }
   }
   throw std::invalid_argument("ERROR: no multiplicative inverse!");
 }
 
-inline int exp_help(int base, int ex, int acc){
-  if(ex == 0) return 1;
-  if(ex == 1) return acc;
-  return exp_help(base, ex - 1, acc * base);
+inline num exp_help(num base, num ex, num acc){
+  if(ex == num(0)) return num(1);
+  if(ex == num(1)) return acc;
+  return exp_help(base, ex - num(1), acc * base);
 }
 
-int exp(int base, int ex){
+num exp(num base, num ex){
   return exp_help(base, ex, base);
 }
 
-int exp_mod(int base, int exp, int mod){
-  int ret = 1;
-  while (exp > 0){
-    if (exp % 2 == 1){
+num exp_mod(num base, num e, num mod){
+  //via repeated squaring
+  num ret = num(1);
+  while (e > num(0)){
+    if (e % 2 == num(1)){
       ret = (ret * base) % mod;
     }
-    exp = exp >> 1;
+    e = e / 2;
     base = (base * base) % mod;
   }
   return ret;

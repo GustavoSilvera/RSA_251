@@ -2,35 +2,39 @@
 #define ENCODING
 #include <string>
 #include "util.h"
+#include "number.h"
 
-class Encoding {
+class Encoding {//base 27 encoding
  public:
-  std::string decode(int C){
+  std::string decode(num C){
+    if (C < num(0)) return "";//empty string
     std::string ret;
-    while(C >= 27){
-      int d = C % 27;
-      C /= 27;
-      ret += int_to_char(d);
+    while(C >= num(27)){
+      num d = C % 27;
+      C = C / 27;
+      ret = ret +  num_to_char(d);
     }
-    ret += int_to_char(C);
+    ret += num_to_char(C);
     return reverse(ret);
   }
-  int encode(std::string M){
-    int ret = 0;
-    int M_len = M.size();
-    for(int i = 0; i < M_len; i++){
+  num encode(std::string M){
+    num ret = num(0);
+    num M_len = num(M.size());
+    if(M_len == num(0)) return num(-1);//empty string
+    for(int i = 0; num(i) < M_len; i++){//kept i as int
       char c = M[i];
-      int enc = 0;//from ascii to our weird encoding
-      if(c == ' ') enc = 0;// space = 0
-      else enc = int(c) - 97 + 1; // (a -> z) lowercase
-      ret += enc * (exp(27, M_len - i - 1));//base 27
+      num enc = num(0);//from ascii to our weird encoding
+      if(c == ' ') enc = num(0);// space = 0
+      else enc = num(int(c) - 97 + 1); // (a -> z) lowercase
+      ret = ret + enc * (exp(num(27), M_len - num(i) - num(1)));
     }
     return ret;
   }
  private:
-  inline char int_to_char(int d){
-    if(d == 0) return ' ';
-    return char(d + 'a' - 1);
+  inline char num_to_char(num d){
+    int n = d.get_value();
+    if(n == 0) return ' ';
+    return char(n + 'a' - 1);
   }
   inline std::string reverse(std::string r){
     const int strlen = r.size();
