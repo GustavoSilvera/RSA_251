@@ -11,10 +11,12 @@ num totient(num P, num Q){
 
 inline num mod_inverse(num a, num m) { 
   a = a % m;//normalize in mod m
-  for (num x = num(1); x < m.get_value(); x = x + num(1)){
+  for (int x = 1; x < m.get_int(); x++){
     //try every one, guaranteed to terminate
+  
+    std::cout << a.print() << " " << x << " " << m.print() << " " << (a * x).print() << " " << "and" << " " << ((a * x) % m).print() << std::endl;
     if ( (a * x) % m == num(1)){
-      return x;
+      return num(x);
     }
   }
   throw std::invalid_argument("ERROR: no multiplicative inverse!");

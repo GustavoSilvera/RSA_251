@@ -42,8 +42,8 @@ public:
 private:
   num priv_key;
   //P & Q should be sufficiently large primes
-  num P = num(139);
-  num Q = num(251);
+  num P = num(7);
+  num Q = num(11);
   
   std::string Message;
 };
@@ -53,7 +53,7 @@ public:
   Sender(){};
   num ciphertext;
   void setup(std::pair<num, num> public_key){
-    Message = "att";
+    Message = "at";
     num N = public_key.first;//got from public domain
     num Exponent = public_key.second;//got from public domain
     ciphertext = exp_mod(E.encode(Message) % N, Exponent, N);
@@ -71,6 +71,10 @@ int main(){
   std::srand(std::time(nullptr));
   Receiver Bob;
   Sender Alice;
+  //num X = num(166);
+  //num Y = num(155);
+  //std::cout << (X / Y).print() << std::endl;
+  
   Bob.setup();
   std::cout << "In Bob's locked safe: (P = " << Bob.print_P() << ", Q = " << Bob.print_Q() << ")" << std::endl;
   std::cout << "Bob's Private Key: " << Bob.print_key() << std::endl;

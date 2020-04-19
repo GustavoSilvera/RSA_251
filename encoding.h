@@ -32,7 +32,7 @@ class Encoding {//base 27 encoding
   }
  private:
   inline char num_to_char(num d){
-    int n = d.get_value();
+    int n = d.get_int();
     if(n == 0) return ' ';
     return char(n + 'a' - 1);
   }
