@@ -9,18 +9,6 @@ num totient(num P, num Q){
   return (P - num(1)) * (Q - num(1));
 }
 
-inline num mod_inverse(num a, num m) { 
-  a = a % m;//normalize in mod m
-  for (num x = 1; x < m; x = x + num(1)){
-    //try every one, guaranteed to terminate
-    if ( (a * x) % m == num(1)){
-      //std::cout << "MULTIPLICATIVE INV:" << x.print() << std::endl;
-      return x;
-    }
-  }
-  throw std::invalid_argument("ERROR: no multiplicative inverse!");
-}
-
 inline num exp_help(num base, num ex, num acc){
   if(ex == num(0)) return num(1);
   if(ex == num(1)) return acc;
@@ -42,5 +30,50 @@ num exp_mod(num base, num e, num mod){
     base = (base * base) % mod;
   }
   return ret;
+}
+num gcd(num a, num b) { 
+  if (a == num(0)) return b; 
+  return gcd(b % a, a); 
+}
+
+inline num mod_inverse_fast(num a, num m) {
+  //only works if m is prime!
+  num g = gcd(a, m); 
+  if (g == num(1)) {
+    return exp_mod(a, m - num(2), m); 
+  }
+  throw std::invalid_argument("ERROR: no multiplicative inverse!");
+} 
+num gcdExtended(num a, num b, num *x, num *y) { 
+  if (a == num(0)) { //base case
+    *x = num(0), *y = num(1); 
+    return b; 
+  } 
+  num x1, y1; // To store results of recursive call 
+  num gcd = gcdExtended(b%a, a, &x1, &y1); 
+  *x = y1 - (b / a) * x1; 
+  *y = x1; 
+  return gcd; 
+} 
+
+num mod_inverse_in(num a, num m) { 
+    num x, y; 
+    num g = gcdExtended(a, m, &x, &y); 
+    if (g == num(1))
+      return m - ((x%m + m) % m);
+    throw std::invalid_argument("ERROR: no multiplicative inverse!");
+} 
+
+//brute force modular inverse
+inline num mod_inverse(num a, num m) {
+  //can possibly be optimized to log(n) via binary search
+  a = a % m;//normalize in mod m
+  for (num x = 1; x < m; x = x + num(1)){
+    //try every one, guaranteed to terminate
+    if ( (a * x) % m == num(1)){      
+      return x;
+    }
+  }
+  throw std::invalid_argument("ERROR: no multiplicative inverse!");
 }
 #endif
