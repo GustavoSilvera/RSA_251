@@ -25,7 +25,7 @@ public:
     std::cout << "In the Public Domain: (N = " << N.print() << ", E = "<< Exponent.print() << ")" << std::endl;
     pub_key = std::make_pair(N, Exponent);
     //private stuff
-    priv_key = mod_inverse_in(Exponent, phi_N); //P and Q are relatively prime
+    priv_key = mult_inv_rec(Exponent, phi_N); //P and Q are relatively prime
     std::cout << "Bob's Private Key: " << priv_key.print() << std::endl;
   }
   void decode(num ciphertext){
@@ -37,10 +37,10 @@ public:
 private:
   num priv_key;
   //P & Q should be sufficiently large primes
-  //num P = num(11);
-  //num Q = num(7);
-  num P = num("435958568325940791799951965387214406385470910265220196318705482144524085345275999740244625255428455944579");
-  num Q = num("562545761726884103756277007304447481743876944007510545104946851094548396577479473472146228550799322939273");
+  num P = num(11);
+  num Q = num(7);
+  //num P = num("435958568325940791799951965387214406385470910265220196318705482144524085345275999740244625255428455944579");
+  //num Q = num("562545761726884103756277007304447481743876944007510545104946851094548396577479473472146228550799322939273");
 
   std::string Message;
 };
@@ -50,14 +50,14 @@ public:
   Sender(){};
   num ciphertext;
   void setup(std::pair<num, num> public_key){
-    Message = "unknown";
+    Message = "at";
     std::cout << "Alice's Private Message: \"" << Message << "\"" << std::endl; 
     num N = public_key.first;//got from public domain
     num Exponent = public_key.second;//got from public domain
     num encoded = E.encode(Message) % N;
     std::cout << "Alice's Encoding: " << encoded.print() << std::endl;
-    //ciphertext = exp_mod(encoded, Exponent, N);
-    ciphertext = num("163077576587089932277514178989798339755826189700674110151160860819557757512053108465634676999401755817425637794522932574265893488854028596522889419543378155476439015236106447427921542963150735762104095795184542");//from 251
+    ciphertext = exp_mod(encoded, Exponent, N);
+    //ciphertext = num("163077576587089932277514178989798339755826189700674110151160860819557757512053108465634676999401755817425637794522932574265893488854028596522889419543378155476439015236106447427921542963150735762104095795184542");//from 251
     std::cout << "Alice's Public Ciphertext: " << ciphertext.print() << std::endl;
   }
 private:

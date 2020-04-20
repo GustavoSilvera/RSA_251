@@ -165,8 +165,7 @@ class num {
     }
     return here;*/
   }
-  //long bois
-
+  //for large divisions, log(n) binary search
   num binSearchDiv(const num &dividend, const num &divisor) const {
     num l = num(0);
     num r = dividend;

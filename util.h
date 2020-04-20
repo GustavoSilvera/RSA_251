@@ -63,9 +63,20 @@ num mod_inverse_in(num a, num m) {
     //extended euclidean algorithm!
     num g = gcdExtended(a, m, &x, &y); 
     if (g == num(1))
-      return m - ((x % m + m) % m);
+      return ((x % m + m) % m);
     throw std::invalid_argument("ERROR: no multiplicative inverse!");
 } 
+
+//recursive implementation
+
+num ObtainMultiplicativeInverse(num a, num b, num s0 = num(1), num s1 = num(0)){
+  return b==num(0) ? s0 :
+    ObtainMultiplicativeInverse(b, a%b, s1, s0 - s1*(a/b));
+}
+ 
+num mult_inv_rec(num a, num m){
+  return ObtainMultiplicativeInverse(a, m) + num(2);
+}
 
 //brute force modular inverse
 inline num mod_inverse(num a, num m) {
