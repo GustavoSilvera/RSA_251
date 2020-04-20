@@ -69,13 +69,13 @@ num mod_inverse_in(num a, num m) {
 
 //recursive implementation
 
-num ObtainMultiplicativeInverse(num a, num b, num s0 = num(1), num s1 = num(0)){
+num ObtainMultiplicativeInverse(num a, num b, num s0, num s1){
   return b==num(0) ? s0 :
     ObtainMultiplicativeInverse(b, a%b, s1, s0 - s1*(a/b));
 }
  
 num mult_inv_rec(num a, num m){
-  return ObtainMultiplicativeInverse(a, m) + num(2);
+  return ObtainMultiplicativeInverse(a, m, num(1), num(0)) + num(2);
 }
 
 //brute force modular inverse
