@@ -72,9 +72,6 @@ int main(){
   std::cout << "Starting" << std::endl;
   unit_test();
   std::cout << "All Unit Tests Passed Successfully!" << std::endl;
-  //  num X = num("10887654321654329876521");
-  //  num Y = num("426543216874621654");
-  //std::cout << (X / Y).print() << std::endl;
   Bob.setup();
   Alice.setup(Bob.pub_key);
   Bob.decode(Alice.ciphertext);

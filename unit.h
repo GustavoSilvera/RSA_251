@@ -2,6 +2,10 @@
 #define UNIT
 #include <cassert>
 #include "number.h"
+#include "util.h"
+
+using namespace std;
+
 
 void unit_test(){
   //testing addition
@@ -47,6 +51,8 @@ void unit_test(){
   assert(num("23947623942") < num("23947623943"));
   assert(num("7") > num("6"));
   assert(num("79") <= num("79"));
+  assert(num("-79") <= num("77"));//removes the negative
+  assert(num("-79").get_len() == num("77").get_len());//removes the negative
   
   
   //other tests
@@ -54,7 +60,36 @@ void unit_test(){
   assert(!num("2876238645284230").is_odd());
   assert(!num("0").is_odd());
   assert(num("11").is_odd());
+
+  //sign stuff
+  assert(num(33) - num("-22") == num(55));
+  assert(num(33) + num("-22") == num(11));
+  assert(num(-1).to_positive() == num(1));
+  assert(num(0).to_positive() == num(0));
+  assert(num(0).to_negative() == num(0));
+  assert(num(26).to_negative() == num("-26"));
+  assert(num("-3947236").to_positive() == num(3947236));
+
+	
   
+  //testing negatives
+  assert(num("-973468273").is_neg());
+  assert(num("-1").is_neg());
+  assert(num(-2393).is_neg());
+  assert(!num("0").is_neg());
+  assert(!num(39742).is_neg());
+  assert(!num(1).is_neg());
+  assert(!num("4982392").is_neg());
+	
+  
+  //testing multiplicative inverses
+#define mod_inv mod_inverse_in
+  //assert(mod_inv(num(7), num(60)) == num(43));
+  std::cout << "multiplicative inv:" << (nummodInverse(num(7), num(60))).print() << std::endl;
+  cout << "mod mult inv =" << modInverse(7, 60) << endl;
+  std::cout << std::endl;
+  //assert(mod_inv(num(3), num(26)) == num(9));
+  //assert(mod_inv(num(653), num(5846)) == num(2829));
   
 }
 

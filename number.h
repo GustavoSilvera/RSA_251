@@ -11,14 +11,18 @@ class num {
     sign = 0;
     len = 1;
   };
+  num(const std::string &s){
+    num_init(s);
+  };
   num(const int32_t a) {
-    value = std::to_string(a);
-    if(a > 0) sign = 1;
-    else if (a < 0) sign = -1;
-    else sign = 0;
+    num_init(std::to_string(a));
+  };
+  num( const num &n ){
+    value = n.get_value();//need for constexpr errors
+    sign = n.get_sign();
     len = value.size();
   };
-  num(const std::string &s){
+  void num_init(const std::string &s){
     if(s[0] == '-'){
       sign = -1;
       value = clean(s.substr(1));//not including '-'
@@ -27,15 +31,11 @@ class num {
       sign = 1;
       value = clean(s);
     }
+    if(value == "0") sign = 0;
     len = value.size();
-  };
-  num( const num &n ){
-    value = n.get_value();//need for constexpr errors
-    sign = n.get_sign();
-    len = value.size();
-  };
-  
+  }
   num operator + (const num &n) const {//O(n)
+    if(n.is_neg()) return (*this - n.to_positive());
     std::string str1 = value;
     std::string str2 = n.get_value();
     if (str1.length() > str2.length()) 
@@ -88,6 +88,7 @@ class num {
     return clean(ret);
   }
   num operator - (const num &n) const {
+    if(n.is_neg()) return (*this) + n.to_positive();
     std::string str1 = value;
     std::string str2 = n.get_value();
     if (str1.size() < str2.size()) swap(str1, str2); 
@@ -116,7 +117,7 @@ class num {
     }  
     return clean(rev(str)); 
   }
-  num sdiv (const num &n) const {
+  num sdiv (const num &n) const {//division a/b where b is small
     int divisor = n.get_int();
     std::string number = value;
     std::string ans; 
@@ -131,15 +132,8 @@ class num {
     return num(ans); 
   }
   num operator / (const num &n) const {
-    //if(n < num(2147483647)) return (*this).sdiv(n);
-    //num other = n;
-    //int count = 0;
+    if(n < num(2147483647)) return (*this).sdiv(n);//optimized for small nums
     return binSearchDiv(*this, n);
-      /*while(*this >= other){
-      count++;
-      other = other + n;
-    }
-    return count;*/
   }
   num smod (const num &n) const {
     //for modding a big num with a small num
@@ -150,20 +144,11 @@ class num {
     return res; 
   }
   num operator % (const num &n) const {
-    //if(n < num(2147483647)) return (*this).smod(n);
-    //if(len < n.get_len()) return *this;//much smaller
-    //wont work nicely with negatives
-    //for big bois
+    if(n == num(2)) return (*this).is_even() ? 0 : 1;//evens
+    if(n == num(1)) return (*this).is_odd() ? 0 : 1;//odds
     num quotient = *this / n;
     num remainder = *this - quotient * n;
     return remainder;
-    //for small bois
-    /*num here = *this;
-    if(*this < n) return *this;
-    while(here >= n){
-      here = here - n;
-    }
-    return here;*/
   }
   //for large divisions, log(n) binary search
   num binSearchDiv(const num &dividend, const num &divisor) const {
@@ -187,15 +172,20 @@ class num {
   
   //comparison operators
   bool operator == (const num &n) const{
-    if(len != n.get_len()) return false;
+    if(sign != n.get_sign()) return false;//must have same sign
+    if(len != n.get_len()) return false;//same length (when cleaned)
     return (value.compare(n.get_value()) == 0);
   }
   bool operator < (const num &n) const{
+    if(sign > n.get_sign()) return false;//positive < negative == false
+    else if (sign < n.get_sign()) return true;//negative < positive == true
     if(len < n.get_len()) return true;
     else if (len > n.get_len()) return false;
     return (value.compare(n.get_value()) < 0);
   }
   bool operator > (const num &n) const{
+    if(sign < n.get_sign()) return false;//negative > positive == false
+    else if (sign > n.get_sign()) return true;//positive > negative == true
     if(len > n.get_len()) return true;
     else if (len < n.get_len()) return false;
     return (value.compare(n.get_value()) > 0);
@@ -206,9 +196,24 @@ class num {
   bool operator <= (const num &n) const{
     return (*this < n) || (*this == n);
   }
-  bool is_odd(){
+  bool is_odd() const{
     return (int(value[len - 1]) % 2 == 1);
   }
+  bool is_even() const{
+    return !(*this).is_odd();
+  }
+  bool is_neg() const{
+    return (get_sign() == -1);
+  }
+  num to_positive() const {
+    //technically the sign is not carried in the VALUE... which is always positive 
+    return num(value);//not carrying over the sign, defaults to positive
+  }
+  num to_negative() const {
+    std::string v = value;
+    return num(v.insert(0, "-"));//prepending "-" to front of value
+  }
+  
   //mutation operators
   void operator = (const num &n){
     value = clean(n.get_value());

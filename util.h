@@ -48,34 +48,80 @@ inline num mod_inverse_fast(num a, num m) {
 //O(log n) mult inv
 num gcdExtended(num a, num b, num *x, num *y) { 
   if (a == num(0)) { //base case
-    *x = num(0), *y = num(1); 
-    return b; 
-  } 
-  num x1, y1; // To store results of recursive call
-  num gcd = gcdExtended(b % a, a, &x1, &y1);
-  *x = y1 - (b / a) * x1; 
-  *y = x1;
+    *x = num(0);
+    *y = num(1); 
+    return b;
+  }
+  num x1 = num(0);
+  num y1 = num(1); // To store results of recursive call
+  num gcd = gcdExtended(b%a, a, &(x1), &(y1));
+  *(x) = y1 - ((b / a) * x1); 
+  *(y) = x1;
   return gcd; 
 } 
-//computes multiplicative inverse 
-num mod_inverse_in(num a, num m) { 
-    num x, y;
-    //extended euclidean algorithm!
-    num g = gcdExtended(a, m, &x, &y); 
-    if (g == num(1))
-      return ((x % m + m) % m);
-    throw std::invalid_argument("ERROR: no multiplicative inverse!");
+//computes multiplicative inverse
+num mod_inverse_in(num a, num m) {
+  num x = num(0);
+  num y = num(1);
+  num g = gcdExtended(a, m, &x, &y);   //extended euclidean algorithm!
+  if (g == num(1)) return (x % m);
+  throw std::invalid_argument("ERROR: no multiplicative inverse!");
 } 
+
+int modInverse(int a, int m) 
+{ 
+  int m0 = m; 
+  int y = 0, x = 1; 
+  if (m == 1) 
+    return 0; 
+  
+  while (a > 1) 
+    { 
+      // q is quotient 
+      int q = a / m; 
+      int t = m; 
+      m = a % m;
+      a = t; 
+      t = y; 
+      y = x - q * y; 
+      x = t; 
+    } 
+  if (x < 0) 
+    x += m0; 
+  
+  return x; 
+}
+num nummodInverse(num a, num m) 
+{ 
+  num m0 = m; 
+  num y = 0;
+  num x = 1; 
+  if (m == num(1)) return num(0); 
+  while (a > num(1)) { 
+      // q is quotient 
+      num q = a / m; 
+      num t = m; 
+      m = a % m;
+      a = t; 
+      t = y; 
+      y = x - q * y; 
+      x = t; 
+    }
+  
+  if (x < num(0)) 
+    x = x + m0; 
+  
+  return x; 
+}
 
 //recursive implementation
 
 num ObtainMultiplicativeInverse(num a, num b, num s0, num s1){
-  return b==num(0) ? s0 :
-    ObtainMultiplicativeInverse(b, a%b, s1, s0 - s1*(a/b));
+  return b==num(0) ? s0 : ObtainMultiplicativeInverse(b, a%b, s1, s0 - s1*(a/b));
 }
  
 num mult_inv_rec(num a, num m){
-  return ObtainMultiplicativeInverse(a, m, num(1), num(0)) + num(2);
+  return ObtainMultiplicativeInverse(a, m, num(1), num(0));
 }
 
 //brute force modular inverse
