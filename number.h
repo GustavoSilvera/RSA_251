@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class num {
  public:
@@ -63,36 +64,35 @@ class num {
     if (carry != 0) str.push_back(carry+'0'); 
     return clean(rev(str)); 
   }
-  
-  num operator * (const num &n) const {//O(n^2)
-    std::string other = n.get_value();
-    int len2 = other.size(); 
-    if (len == 0 || len2 == 0) return num("0"); 
-    std::vector<int> result(len + len2, 0); 
-    int i_n1 = 0;  
-    int i_n2 = 0;  
-    for (int i = len - 1; i >= 0; i--){ 
-        int carry = 0; 
-        int n1 = value[i] - '0'; 
-        i_n2 = 0;  
-        for (int j = len2 - 1; j >= 0; j--){ 
-            int n2 = other[j] - '0'; 
-            int sum = n1 * n2 + result[i_n1 + i_n2] + carry; 
-            carry = sum / 10; 
-            result[i_n1 + i_n2] = sum % 10; 
-	    i_n2++; 
-        } 
-	if (carry > 0) result[i_n1 + i_n2] += carry; 
-        i_n1++; 
-    } 
-    int i = result.size() - 1; 
-    while (i >= 0 && result[i] == 0) i--; //ignoring 0's
-    if (i == -1) //one must have been all 0's
-      return num("0"); 
-    std::string ret = ""; 
-    while (i >= 0) ret += std::to_string(result[i--]);
-    if(sign != n.get_sign()) return num(clean(ret)).to_negative();
-    return num(clean(ret));//unsigned
+  num operator * (const num &n) const {
+    std::string num2 = n.get_value();
+    std::string num1 = value;
+    int len2 = num2.size();
+    if(len == 0 || len2 == 0) return num("0");
+    std::string ret(len + len2 + 1,'0');
+    //reversed strings to go back and forth
+    num1 = rev(num1);
+    num2 = rev(num2);
+    //std::unordered_map<int, group> memo = {};
+    //can use memoization... probably
+    for(int i = 0; i < len2; i++){
+      int carry = 0;
+      int dig2 = num2[i] - '0';
+      for(int j = 0; j < int(len); j++){
+	int dig1 = num1[j] - '0';
+	int temp = ret[i + j] - '0';
+	int cur = dig1 * dig2 + temp + carry;
+	ret[i + j] = cur % 10 + '0';
+	carry = cur / 10;
+      }
+      ret[i + num1.size()] = carry + '0';
+    }
+    ret = rev(ret);
+    int pos = ret.find_first_not_of('0', 0);
+    int len3 = ret.size();
+    if(pos < 0 || pos >= len3) pos = len3 - 1;
+    if(sign != n.get_sign()) return num(ret.substr(pos, len3 - pos)).to_negative();
+    return num(ret.substr(pos, len3 - pos));
   }
   num operator - (const num &n) const {
     if(n.is_neg()) return (*this) + n.to_positive();
@@ -140,6 +140,9 @@ class num {
     return num(ans); 
   }
   num operator / (const num &n) const {
+    if(n == num(1)) return *this;
+    if(n == num(0)) throw std::invalid_argument("failed division!");
+    if(n == num(10)) return num(value.substr(0, len - 2));
     if(n < num(2147483647)){
       if(sign != n.get_sign()) return ((*this).sdiv(n)).to_negative();
       return (*this).sdiv(n);//optimized for small nums
@@ -158,6 +161,7 @@ class num {
   num operator % (const num &n) const {
     if(n == num(2)) return (*this).is_even() ? 0 : 1;//evens
     if(n == num(1)) return (*this).is_odd() ? 0 : 1;//odds
+    if(n == num(10))return num(value[len - 2]);
     num quotient = *this / n;
     num remainder = *this - quotient * n;
     return remainder;

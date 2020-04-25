@@ -90,21 +90,26 @@ void unit_test(){
   assert(mod_inv(num(653), num(5846)) == num(2829));
 
   //doin all the tests
-  for(int i = -100; i < 100; i+=7){
+  for(int i = -50000; i < 50000; i+=7){
     std::srand(std::time(nullptr));
-    int interesting = (rand() % 1000) - 500;
+    int interesting = (rand() % 10000) - 5000;
     int add = (i + interesting);
     int sub = (i - interesting);
     int mul = (i * interesting);
-    int div = (i / interesting);
-    int mod = (i % interesting);
+    int div = 0, mod = 0;
+    if(interesting != 0){
+      div = (i / interesting);
+      mod = (i % interesting);
+    }
     num n = num(i);
     num intr = num(interesting);
     assert(n + intr == num(add));
     assert(n - intr == num(sub));
     assert(n * intr == num(mul));
-    assert(n / intr == num(div));
-    assert(n % intr == num(mod));
+    if(interesting != 0){
+      assert(n / intr == num(div));
+      assert(n % intr == num(mod));
+    }
   }
 
   
