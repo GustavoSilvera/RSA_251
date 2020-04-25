@@ -40,7 +40,7 @@ class num {
       if(n.is_neg()){
 	return ((*this).to_positive() + n.to_positive()).to_negative();
       }
-      return (n - (*this).to_positive());
+      return (n + (*this));
     }
     std::string str1 = value;
     std::string str2 = n.get_value();
@@ -140,7 +140,11 @@ class num {
     return num(ans); 
   }
   num operator / (const num &n) const {
-    if(n < num(2147483647)) return (*this).sdiv(n);//optimized for small nums
+    if(n < num(2147483647)){
+      if(sign != n.get_sign()) return ((*this).sdiv(n)).to_negative();
+      return (*this).sdiv(n);//optimized for small nums
+    }
+    if(sign != n.get_sign()) return (binSearchDiv(*this,n)).to_negative();
     return binSearchDiv(*this, n);
   }
   num smod (const num &n) const {
