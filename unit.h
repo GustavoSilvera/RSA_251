@@ -69,7 +69,7 @@ void unit_test(){
   assert(num(0).to_negative() == num(0));
   assert(num(26).to_negative() == num("-26"));
   assert(num("-3947236").to_positive() == num(3947236));
-
+  assert(num(1) - num(1)*num(-8) == num(9));
 	
   
   //testing negatives
@@ -83,13 +83,11 @@ void unit_test(){
 	
   
   //testing multiplicative inverses
-#define mod_inv mod_inverse_in
-  //assert(mod_inv(num(7), num(60)) == num(43));
-  std::cout << "multiplicative inv:" << (nummodInverse(num(7), num(60))).print() << std::endl;
-  cout << "mod mult inv =" << modInverse(7, 60) << endl;
+#define mod_inv modInverse
+  assert(mod_inv(num(7), num(60)) == num(43));
   std::cout << std::endl;
-  //assert(mod_inv(num(3), num(26)) == num(9));
-  //assert(mod_inv(num(653), num(5846)) == num(2829));
+  assert(mod_inv(num(3), num(26)) == num(9));
+  assert(mod_inv(num(653), num(5846)) == num(2829));
   
 }
 

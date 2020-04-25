@@ -68,50 +68,33 @@ num mod_inverse_in(num a, num m) {
   throw std::invalid_argument("ERROR: no multiplicative inverse!");
 } 
 
-int modInverse(int a, int m) 
+template <typename T>
+T modInverse(T a, T m) 
 { 
-  int m0 = m; 
-  int y = 0, x = 1; 
+  T m0 = m; 
+  T y = 0, x = 1; 
   if (m == 1) 
     return 0; 
   
   while (a > 1) 
     { 
-      // q is quotient 
-      int q = a / m; 
-      int t = m; 
+      // q is quotient
+      T q = a / m; 
+      T t = m;
       m = a % m;
       a = t; 
-      t = y; 
+      t = y;
       y = x - q * y; 
-      x = t; 
-    } 
+      x = t;
+    }
   if (x < 0) 
-    x += m0; 
+    x = x + m0; 
   
   return x; 
 }
 num nummodInverse(num a, num m) 
-{ 
-  num m0 = m; 
-  num y = 0;
-  num x = 1; 
-  if (m == num(1)) return num(0); 
-  while (a > num(1)) { 
-      // q is quotient 
-      num q = a / m; 
-      num t = m; 
-      m = a % m;
-      a = t; 
-      t = y; 
-      y = x - q * y; 
-      x = t; 
-    }
-  
-  if (x < num(0)) 
-    x = x + m0; 
-  
-  return x; 
+{
+  return modInverse(a, m);
 }
 
 //recursive implementation

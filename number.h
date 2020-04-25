@@ -36,6 +36,12 @@ class num {
   }
   num operator + (const num &n) const {//O(n)
     if(n.is_neg()) return (*this - n.to_positive());
+    if((*this).is_neg()){
+      if(n.is_neg()){
+	return ((*this).to_positive() + n.to_positive()).to_negative();
+      }
+      return (n - (*this).to_positive());
+    }
     std::string str1 = value;
     std::string str2 = n.get_value();
     if (str1.length() > str2.length()) 
@@ -84,11 +90,13 @@ class num {
     if (i == -1) //one must have been all 0's
       return num("0"); 
     std::string ret = ""; 
-    while (i >= 0) ret += std::to_string(result[i--]); 
-    return clean(ret);
+    while (i >= 0) ret += std::to_string(result[i--]);
+    if(sign != n.get_sign()) return num(clean(ret)).to_negative();
+    return num(clean(ret));//unsigned
   }
   num operator - (const num &n) const {
     if(n.is_neg()) return (*this) + n.to_positive();
+    if(n > *this) return (n - *this).to_negative();
     std::string str1 = value;
     std::string str2 = n.get_value();
     if (str1.size() < str2.size()) swap(str1, str2); 
@@ -229,7 +237,9 @@ class num {
     return std::stoi(value);
   }
   std::string print() const {
-    return clean(value);
+    std::string unsign = clean(value);
+    if(sign < 0) return unsign.insert(0, "-");
+    return unsign;
   }
   int get_sign() const {
     return sign;
@@ -261,5 +271,11 @@ class num {
     return r.substr(i);
   }
 };
+
+template <typename T>
+T & operator<<(T &s, num n) {
+  return s << n.print();
+}
+
 
 #endif
