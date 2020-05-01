@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include "number.h"
+#include <utility>
 //designed to work with num class
 num totient(num P, num Q){
   //check for coprimality of P and Q
@@ -32,19 +33,12 @@ num exp_mod(num base, num e, num mod){
   }
   return ret;
 }
+
 num gcd(num a, num b) { 
   if (a == num(0)) return b; 
   return gcd(b % a, a); 
 }
 
-inline num mod_inverse_fast(num a, num m) {
-  //only works if m is prime!
-  num g = gcd(a, m); 
-  if (g == num(1)) {
-    return exp_mod(a, m - num(2), m); 
-  }
-  throw std::invalid_argument("ERROR: no multiplicative inverse!");
-}
 //O(log n) mult inv
 num gcdExtended(num a, num b, num *x, num *y) { 
   if (a == num(0)) { //base case
@@ -54,8 +48,9 @@ num gcdExtended(num a, num b, num *x, num *y) {
   }
   num x1 = num(0);
   num y1 = num(1); // To store results of recursive call
-  num gcd = gcdExtended(b%a, a, &(x1), &(y1));
-  *(x) = y1 - ((b / a) * x1); 
+  std::pair<num, num> ba_divmod = b.divmod(a);
+  num gcd = gcdExtended(ba_divmod.second, a, &(x1), &(y1));
+  *(x) = y1 - ((ba_divmod.first) * x1); 
   *(y) = x1;
   return gcd; 
 } 
@@ -69,45 +64,26 @@ num mod_inverse_in(num a, num m) {
 } 
 
 template <typename T>
-T modInverse(T a, T m) 
-{ 
+T modInverse(T a, T m) { 
   T m0 = m; 
   T y = 0, x = 1; 
-  if (m == 1) 
-    return 0; 
-  
-  while (a > 1) 
-    { 
-      // q is quotient
-      T q = a / m; 
-      T t = m;
-      m = a % m;
-      a = t; 
-      t = y;
-      y = x - q * y; 
-      x = t;
-    }
-  if (x < 0) 
-    x = x + m0; 
-  
+  if (m == 1) return 0; 
+  while (a > 1) { 
+    T q = a / m; 
+    T t = m;
+    m = a % m;
+    a = t; 
+    t = y;
+    y = x - q * y; 
+    x = t;
+  }
+  if (x < 0) x = x + m0; 
   return x; 
 }
-num nummodInverse(num a, num m) 
-{
-  return modInverse(a, m);
-}
 
-//recursive implementation
-
-num ObtainMultiplicativeInverse(num a, num b, num s0, num s1){
-  return b==num(0) ? s0 : ObtainMultiplicativeInverse(b, a%b, s1, s0 - s1*(a/b));
-}
- 
-num mult_inv_rec(num a, num m){
-  return ObtainMultiplicativeInverse(a, m, num(1), num(0));
-}
 
 //brute force modular inverse
+//for debugging only... not practical
 inline num mod_inverse(num a, num m) {
   //can possibly be optimized to log(n) via binary search
   a = a % m;//normalize in mod m

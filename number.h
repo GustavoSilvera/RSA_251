@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <utility>
 
 class num {
  public:
@@ -98,36 +99,6 @@ class num {
     }
     return num(clean(ret));    
   }
-  /*num operator * (const num &n) const {
-    std::string num2 = n.get_value();
-    std::string num1 = value;
-    int len2 = num2.size();
-    if(len == 0 || len2 == 0) return num("0");
-    std::string ret(len + len2 + 1,'0');
-    //reversed strings to go back and forth
-    num1 = rev(num1);
-    num2 = rev(num2);
-    //std::unordered_map<int, group> memo = {};
-    //can use memoization... probably
-    for(int i = 0; i < len2; i++){
-      int carry = 0;
-      int dig2 = num2[i] - '0';
-      for(int j = 0; j < int(len); j++){
-	int dig1 = num1[j] - '0';
-	int temp = ret[i + j] - '0';
-	int cur = dig1 * dig2 + temp + carry;
-	ret[i + j] = cur % 10 + '0';
-	carry = cur / 10;
-      }
-      ret[i + num1.size()] = carry + '0';
-    }
-    ret = rev(ret);
-    int pos = ret.find_first_not_of('0', 0);
-    int len3 = ret.size();
-    if(pos < 0 || pos >= len3) pos = len3 - 1;
-    if(sign != n.get_sign()) return num(ret.substr(pos, len3 - pos)).to_negative();
-    return num(ret.substr(pos, len3 - pos));
-    }*/
   num operator - (const num &n) const {
     if(n.is_neg()) return (*this) + n.to_positive();
     if(n > *this) return (n - *this).to_negative();
@@ -160,7 +131,7 @@ class num {
     return clean(rev(str)); 
   }
   num sdiv (const num &n) const {//division a/b where b is small
-    int divisor = n.get_int();
+    int divisor = n.get_int();//requires n is a small int
     std::string number = value;
     std::string ans; 
     size_t idx = 0; 
@@ -175,14 +146,16 @@ class num {
   }
   num operator / (const num &n) const {
     if(n == num(1)) return *this;
-    if(n == num(0)) throw std::invalid_argument("failed division!");
+    if(n == num(0)) throw std::invalid_argument("Divide by 0");
     if(n == num(10)) return num(value.substr(0, len - 2));
-    if(n < num(2147483647)){
-      if(sign != n.get_sign()) return ((*this).sdiv(n)).to_negative();
-      return (*this).sdiv(n);//optimized for small nums
-    }
-    if(sign != n.get_sign()) return (binSearchDiv(*this,n)).to_negative();
-    return binSearchDiv(*this, n);
+    //if(n.to_positive() < num(2147483647)){
+    //  if(sign != n.get_sign()) return ((*this).sdiv(n)).to_negative();
+    //  return (*this).sdiv(n);//optimized for small nums
+    //}
+    //if(sign != n.get_sign()) return (binSearchDiv(*this,n)).to_negative();
+    //return binSearchDiv(*this, n);
+    if(sign != n.get_sign()) return ((*this).div(n)).to_negative();
+    return (*this).div(n);
   }
   num smod (const num &n) const {
     //for modding a big num with a small num
@@ -193,32 +166,93 @@ class num {
     return res; 
   }
   num operator % (const num &n) const {
-    if(n == num(2)) return (*this).is_even() ? 0 : 1;//evens
     if(n == num(1)) return (*this).is_odd() ? 0 : 1;//odds
+    if(n == num(2)) return (*this).is_even() ? 0 : 1;//evens
     if(n == num(10))return num(value[len - 2]);
+    return ((*this).divmod(n)).second;
+  }
+  std::pair<num, num> divmod (const num &n) const{
     num quotient = *this / n;
     num remainder = *this - quotient * n;
-    return remainder;
+    return std::make_pair(quotient, remainder);
+  }
+  std::tuple<num, num> divide(const num& dividend, const num& divisor) const {
+    num quotient, remainder, temp;
+    temp = divisor;
+    quotient = 1;
+    while (temp < dividend) {
+      quotient = quotient + num(1);
+        temp = temp + divisor;
+    }
+    if (temp > dividend) {
+      quotient = quotient - num(1);
+      remainder = dividend - (temp - divisor);
+    }
+    return std::make_tuple(quotient, remainder);
+  }
+  num div(const num &n) const {
+    num abs_dividend = (*this).to_positive();
+    num abs_divisor = (n).to_positive();
+    if (n == 0)
+      throw std::logic_error("Attempted division by zero");
+    if (abs_dividend < abs_divisor)
+      return num(0);
+    num quotient;
+    const long long LLONG_MAX = 2147483647;
+    if (abs_dividend <= LLONG_MAX && abs_divisor <= LLONG_MAX)
+      quotient = num(std::stoll(abs_dividend.get_value()) / std::stoll(abs_divisor.get_value()));
+    else if (abs_dividend == abs_divisor)
+      quotient = 1;
+    else {
+      std::string ret = "";// the value is cleared as digits will be appended
+      num chunk, chunk_quotient, chunk_remainder;
+      size_t chunk_index = 0;
+      chunk_remainder = abs_dividend.get_value().substr(chunk_index, abs_divisor.get_len() - 1);
+      chunk_index = abs_divisor.get_len() - 1;
+      while (chunk_index < abs_dividend.get_len()) {
+	chunk = num((chunk_remainder.get_value()).append(1, abs_dividend.get_value()[chunk_index]));
+	chunk_index ++;
+	while (chunk < abs_divisor) {
+	  quotient = num(quotient.get_value().append("0"));
+	  if (chunk_index < abs_dividend.get_len()) {
+	    chunk = num(chunk.get_value().append(1, abs_dividend.get_value()[chunk_index]));
+	    chunk_index++;
+	  }
+	  else
+	    break;
+	}
+	if (chunk == abs_divisor) {
+	  quotient = num(quotient.get_value().append("1"));
+	  chunk_remainder = num(0);
+	}
+	else if (chunk > abs_divisor) {
+	  chunk = num(clean(chunk.get_value()));
+	  std::tie(chunk_quotient, chunk_remainder) = divide(chunk, abs_divisor);
+	  quotient = num(quotient.get_value() + chunk_quotient.get_value());
+	}
+      }
+    }
+    return num(clean(quotient.value));
   }
   //for large divisions, log(n) binary search
   num binSearchDiv(const num &dividend, const num &divisor) const {
+    //if(dividend.get_len() < divisor.get_len()) return num(0);
     num l = num(0);
-    num r = dividend;
+    num r = dividend.to_positive();
     while (l <= r) { 
       num m = (r + l).sdiv(num(2)); //2 is a small number
-      num possible = m * divisor;
-      num possible_next = possible + divisor;
-      if (possible <= dividend && possible_next > dividend)//best one 
+      num possible = m * divisor.to_positive();
+      num possible_next = possible + divisor.to_positive();
+      if (possible <= dividend.to_positive() && possible_next > dividend.to_positive())//best one 
 	return m; 
-      if (possible < dividend) 
-	l = m + num(1);
+      if (possible < dividend.to_positive()) 
+	l = m;// + num(1);
       else
-	r = m - num(1);
+	r = m;// - num(1);
     }
     //error!
-    throw std::invalid_argument("failed division!");
-    return num(-1);
-}
+    return num(0);
+  }
   
   //comparison operators
   bool operator == (const num &n) const{

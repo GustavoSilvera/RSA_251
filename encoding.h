@@ -10,9 +10,10 @@ class Encoding {//base 27 encoding
     if (C < num(0)) return "";//empty string
     std::string ret;
     while(C >= num(27)){
-      num d = C % 27;
-      C = C / 27;
-      ret = ret +  num_to_char(d);
+      std::pair<num, num> C27_divmod = C.divmod(num(27));
+      num d = C27_divmod.second;
+      C = C27_divmod.first;
+      ret = ret + num_to_char(d);
     }
     ret += num_to_char(C);
     return reverse(ret);
