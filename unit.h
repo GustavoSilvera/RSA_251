@@ -31,7 +31,6 @@ void unit_test(){
   assert(num(1) / num(6) == num(0));
   assert(num("5221246936452212469364") / num("52212469364") == num("100000000001"));
   assert(num("84653285885458762584515439") / num(552) == num("153357401966410801783542"));
-  
   //modular arithmetic
   assert(num(5) % num(5) == num(0));
   assert(num(77) % num(5) == num(2));

@@ -65,6 +65,40 @@ class num {
     return clean(rev(str)); 
   }
   num operator * (const num &n) const {
+    std::string a = value;
+    std::string b = n.get_value();
+    int len1 = len;
+    int len2 = b.size();
+    if(len1 == 0 || len2 == 0) return num(0);
+    if((*this) == num(0) || n == num(0)) return num(0);
+    if((*this) == num(1)) return n;
+    if(n == num(1)) return num(value);
+    std::vector<int> result(len1 + len2, 0);
+    //const int arrlen = len1 + len2;
+    //int* result = new int[arrlen];
+    for( int i = len1 - 1; i >= 0; i-- ){
+      for( int j = len2 - 1; j >= 0; j-- ){
+	result[ i + j + 1 ] += ( b[ j ] - '0') * ( a[ i ] - '0' );
+	//result[i+j+1] = 1;
+      }
+    }
+    for( int i = len1 + len2 - 1; i >= 0; i-- ){
+      if( result[ i] >= 10 ){
+	result[ i - 1 ] += result[ i ] / 10;//carry
+	result[ i ] %= 10;
+      }
+    }
+    std::string ret;
+    for( int i = 0; i < int(len1 + len2); i++ ){
+      ret += (std::to_string(result[i]));
+    }
+    //std::cout << sign << " " << n.get_sign() << std::endl;
+    if(sign != n.get_sign()){
+      return num(clean(ret)).to_negative();
+    }
+    return num(clean(ret));    
+  }
+  /*num operator * (const num &n) const {
     std::string num2 = n.get_value();
     std::string num1 = value;
     int len2 = num2.size();
@@ -93,7 +127,7 @@ class num {
     if(pos < 0 || pos >= len3) pos = len3 - 1;
     if(sign != n.get_sign()) return num(ret.substr(pos, len3 - pos)).to_negative();
     return num(ret.substr(pos, len3 - pos));
-  }
+    }*/
   num operator - (const num &n) const {
     if(n.is_neg()) return (*this) + n.to_positive();
     if(n > *this) return (n - *this).to_negative();
